@@ -3,7 +3,7 @@
 pragma solidity ^0.8.18;
 
 import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
@@ -30,7 +30,7 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__TransferFailed();
 
     mapping(address token => address priceFeed) private s_priceFeeds; // token to price feed
-    mapping(adddress user => mapping(address token => uint256 amount)) private s_collateralDeposited; // user to token to amount deposited
+    mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited; // user to token to amount deposited
 
     DecentralizedStableCoin private immutable i_dsc;
 
@@ -86,7 +86,9 @@ contract DSCEngine is ReentrancyGuard {
 
     function redeemCollateral() external {}
 
-    function mintDsc() external {}
+    function mintDsc(uint256 amountDscToMint) external moreThanZero(amountDscToMint) nonReentrant {
+
+    }
 
     function burnDsc() external {}
 
