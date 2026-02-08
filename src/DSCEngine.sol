@@ -130,7 +130,9 @@ contract DSCEngine is ReentrancyGuard {
 
     function liquidate() external {}
 
-    function getHealthFactor() external view {}
+    function getHealthFactor() external view returns (uint256) {
+        return _healthFactor(msg.sender);
+    }
 
     /**
      * Returns how close to liquidation a user is
