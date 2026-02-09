@@ -6,7 +6,7 @@ This is a section of the Cyfrin Solidity Course.
 
 # About
 
-This is a DeFi Stablecoin.
+This project is a decentralized overcollateralized stablecoin protocol inspired by DAI. It uses Chainlink price feeds to maintain a $1 USD peg and enforces on-chain collateralization rules to ensure system solvency. Users can mint the stablecoin by depositing exogenous crypto collateral (wETH and wBTC), with minting and liquidation logic enforced algorithmically through smart contracts. The protocol demonstrates core DeFi concepts including price oracles, collateralized debt positions, mint/burn mechanics, and decentralized stability guarantees.
 
 Architecture:
 1. Relative Stability: Anchored or Pegged -> $1.00
