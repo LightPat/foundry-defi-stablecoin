@@ -302,4 +302,12 @@ contract DSCEngine is ReentrancyGuard {
     {
         (totalDscMinted, collateralValueInUsd) = _getAccountInformation(user);
     }
+
+    function getAdditionalFeedPrecision() external pure returns (uint256) {
+        return ADDITIONAL_FEED_PRECISION;
+    }
+
+    function getPrecision() external pure returns (uint256) {
+        return PRECISION;
+    }
 }
