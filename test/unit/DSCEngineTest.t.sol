@@ -435,7 +435,8 @@ contract DSCEngineTest is Test {
                 / dscEngine.getLiquidationPrecision());
 
         uint256 usdAmountLiquidated = dscEngine.getUsdValue(weth, amountLiquidated);
-        uint256 expectedUserCollateralValueInUsd = dscEngine.getUsdValue(weth, AMOUNT_COLLATERAL) - (usdAmountLiquidated);
+        uint256 expectedUserCollateralValueInUsd =
+            dscEngine.getUsdValue(weth, AMOUNT_COLLATERAL) - (usdAmountLiquidated);
 
         (, uint256 userCollateralValueInUsd) = dscEngine.getAccountInformation(USER);
         uint256 hardCodedExpectedValue = 70_000_000_000_000_000_020;
