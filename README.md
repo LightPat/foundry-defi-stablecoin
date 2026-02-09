@@ -54,7 +54,7 @@ make
 ## Deploy
 
 ```
-forge script script/DeployFundMe.s.sol
+forge script script/DeployDSC.s.sol
 ```
 
 ## Testing
@@ -111,7 +111,7 @@ Head over to [faucets.chain.link](https://faucets.chain.link/) and get some test
 3. Deploy
 
 ```
-forge script script/DeployFundMe.s.sol --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+forge script script/DeployDSC.s.sol --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
 ```
 
 ## Estimate gas
