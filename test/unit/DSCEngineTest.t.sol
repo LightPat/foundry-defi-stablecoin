@@ -13,6 +13,7 @@ import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
 import {MockFailedMintDSC} from "../mocks/MockFailedMintDsc.sol";
 import {MockFailedTransfer} from "../mocks/MockFailedTransfer.sol";
 import {MockMoreDebtDSC} from "../mocks/MockMoreDebtDsc.sol";
+import {OracleLib} from "../../src/libraries/OracleLib.sol";
 
 contract DSCEngineTest is Test {
     DeployDSC deployer;
@@ -512,5 +513,41 @@ contract DSCEngineTest is Test {
         uint256 expectedLiquidationPrecision = 100;
         uint256 actualLiquidationPrecision = dscEngine.getLiquidationPrecision();
         assertEq(actualLiquidationPrecision, expectedLiquidationPrecision);
+    }
+
+    function testFreshPriceDoesNotRevertReturnsCorrectValues() public {
+        if (block.chainid == 31337) { // If running on local anvil chain
+            assertEq(dscEngine.getUsdValue(weth, 1), uint256(helperConfig.ETH_USD_PRICE()) * dscEngine.getAdditionalFeedPrecision() / dscEngine.getPrecision());
+        }
+    }
+
+    function testPriceUpdated2HoursAgoDoesNotRevert() public {
+        if (block.chainid == 31337) { // If running on local anvil chain
+            vm.warp(block.timestamp + 2 hours);
+            assertEq(dscEngine.getUsdValue(weth, 1), uint256(helperConfig.ETH_USD_PRICE()) * dscEngine.getAdditionalFeedPrecision() / dscEngine.getPrecision());
+        }
+    }
+
+    function testPriceUpdatedExactly3HoursAgoDoesNotRevert() public {
+        if (block.chainid == 31337) {
+            vm.warp(block.timestamp + 3 hours); // ≤ 3h → allowed
+            assertEq(dscEngine.getUsdValue(weth, 1), uint256(helperConfig.ETH_USD_PRICE()) * dscEngine.getAdditionalFeedPrecision() / dscEngine.getPrecision());
+        }
+    }
+
+    function testStalePriceMoreThan3HoursReverts() public {
+        if (block.chainid == 31337) {
+            vm.warp(block.timestamp + 3 hours + 1 seconds);
+            vm.expectRevert(OracleLib.OracleLib__StalePrice.selector);
+            dscEngine.getUsdValue(weth, 1);
+        }
+    }
+
+    function testVeryOldPriceReverts() public {
+        if (block.chainid == 31337) {
+            vm.warp(block.timestamp + 10 days);
+            vm.expectRevert(OracleLib.OracleLib__StalePrice.selector);
+            dscEngine.getUsdValue(weth, 1);
+        }
     }
 }
