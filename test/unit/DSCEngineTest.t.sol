@@ -516,22 +516,36 @@ contract DSCEngineTest is Test {
     }
 
     function testFreshPriceDoesNotRevertReturnsCorrectValues() public {
-        if (block.chainid == 31337) { // If running on local anvil chain
-            assertEq(dscEngine.getUsdValue(weth, 1), uint256(helperConfig.ETH_USD_PRICE()) * dscEngine.getAdditionalFeedPrecision() / dscEngine.getPrecision());
+        if (block.chainid == 31337) {
+            // If running on local anvil chain
+            assertEq(
+                dscEngine.getUsdValue(weth, 1),
+                uint256(helperConfig.ETH_USD_PRICE()) * dscEngine.getAdditionalFeedPrecision()
+                    / dscEngine.getPrecision()
+            );
         }
     }
 
     function testPriceUpdated2HoursAgoDoesNotRevert() public {
-        if (block.chainid == 31337) { // If running on local anvil chain
+        if (block.chainid == 31337) {
+            // If running on local anvil chain
             vm.warp(block.timestamp + 2 hours);
-            assertEq(dscEngine.getUsdValue(weth, 1), uint256(helperConfig.ETH_USD_PRICE()) * dscEngine.getAdditionalFeedPrecision() / dscEngine.getPrecision());
+            assertEq(
+                dscEngine.getUsdValue(weth, 1),
+                uint256(helperConfig.ETH_USD_PRICE()) * dscEngine.getAdditionalFeedPrecision()
+                    / dscEngine.getPrecision()
+            );
         }
     }
 
     function testPriceUpdatedExactly3HoursAgoDoesNotRevert() public {
         if (block.chainid == 31337) {
             vm.warp(block.timestamp + 3 hours); // ≤ 3h → allowed
-            assertEq(dscEngine.getUsdValue(weth, 1), uint256(helperConfig.ETH_USD_PRICE()) * dscEngine.getAdditionalFeedPrecision() / dscEngine.getPrecision());
+            assertEq(
+                dscEngine.getUsdValue(weth, 1),
+                uint256(helperConfig.ETH_USD_PRICE()) * dscEngine.getAdditionalFeedPrecision()
+                    / dscEngine.getPrecision()
+            );
         }
     }
 
