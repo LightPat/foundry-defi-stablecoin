@@ -85,6 +85,8 @@ forge test --fork-url $SEPOLIA_RPC_URL
 forge coverage
 ```
 
+!["Current Coverage"](DSC-Test-Coverage.png)
+
 # Deploying to local anvil chain
 
 ```
