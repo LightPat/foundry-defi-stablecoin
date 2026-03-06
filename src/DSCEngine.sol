@@ -376,31 +376,41 @@ contract DSCEngine is ReentrancyGuard {
         return address(i_dsc);
     }
 
-    function getHealthFactorDistribution() external view returns (uint256[] memory) {
-        // Buckets: [ <1.0 (Liquidatable), 1.0-1.2, 1.2-1.5, 1.5-2.0, 2.0+ ]
+    /**
+     * @param offset The index in s_users to start from
+     * @param limit The number of users to process in this call
+     * @return distribution The health factor buckets for this specific chunk of users
+     */
+    function getHealthFactorDistribution(uint256 offset, uint256 limit) external view returns (uint256[] memory) {
         uint256[] memory distribution = new uint256[](5);
+        uint256 totalUsers = s_users.length;
 
-        // Cache array to memory for gas efficiency
-        address[] memory users = s_users;
-        uint256 usersLength = users.length;
+        // Ensure we don't go out of bounds
+        uint256 end = offset + limit;
+        if (end > totalUsers) {
+            end = totalUsers;
+        }
 
-        for (uint256 i = 0; i < usersLength; i++) {
-            uint256 hf = _healthFactor(users[i]);
+        for (uint256 i = offset; i < end; i++) {
+            uint256 hf = _healthFactor(s_users[i]);
 
-            // Using MIN_HEALTH_FACTOR (1e18) as the baseline
             if (hf < MIN_HEALTH_FACTOR) {
-                distribution[0]++; // Liquidatable
+                distribution[0]++;
             } else if (hf < (MIN_HEALTH_FACTOR * 12) / 10) {
-                distribution[1]++; // Warning (1.0 - 1.2)
+                distribution[1]++;
             } else if (hf < (MIN_HEALTH_FACTOR * 15) / 10) {
-                distribution[2]++; // Safe (1.2 - 1.5)
+                distribution[2]++;
             } else if (hf < (MIN_HEALTH_FACTOR * 2)) {
-                distribution[3]++; // Very Safe (1.5 - 2.0)
+                distribution[3]++;
             } else {
-                distribution[4]++; // Overcollateralized (2.0+)
+                distribution[4]++;
             }
         }
         return distribution;
+    }
+
+    function getTotalUserCount() external view returns (uint256) {
+        return s_users.length;
     }
 
     struct ProtocolStats {
