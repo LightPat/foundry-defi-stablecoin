@@ -397,4 +397,41 @@ contract DSCEngine is ReentrancyGuard {
         }
         return distribution;
     }
+
+    struct ProtocolStats {
+        uint256 totalTvlUsd;
+        uint256 totalDscSupply;
+        uint256 ethPrice;
+        uint256 collateralRatio;
+    }
+
+    function getGlobalProtocolStats() external view returns (ProtocolStats memory) {
+        uint256 totalCollateralValueUsd = 0;
+        
+        // Iterate through all allowed tokens to get TVL
+        for (uint256 i = 0; i < s_collateralTokens.length; i++) {
+            address token = s_collateralTokens[i];
+            uint256 amount = IERC20(token).balanceOf(address(this));
+            totalCollateralValueUsd += getUsdValue(token, amount);
+        }
+
+        uint256 totalSupply = i_dsc.totalSupply();
+        
+        // Get ETH price specifically (assuming WETH is s_collateralTokens[0] or similar)
+        // Alternatively, call your price feed directly
+        uint256 ethPrice = getUsdValue(s_collateralTokens[0], 1e18); 
+
+        // Calculate Global Collateral Ratio
+        // If supply is 0, ratio is technically infinite, we'll return 0 or a max value
+        uint256 globalRatio = totalSupply > 0 
+            ? (totalCollateralValueUsd * 100) / totalSupply 
+            : 0;
+
+        return ProtocolStats({
+            totalTvlUsd: totalCollateralValueUsd,
+            totalDscSupply: totalSupply,
+            ethPrice: ethPrice,
+            collateralRatio: globalRatio
+        });
+    }
 }
