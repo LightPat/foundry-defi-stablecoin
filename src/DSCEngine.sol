@@ -379,7 +379,7 @@ contract DSCEngine is ReentrancyGuard {
     function getHealthFactorDistribution() external view returns (uint256[] memory) {
         // Buckets: [ <1.0 (Liquidatable), 1.0-1.2, 1.2-1.5, 1.5-2.0, 2.0+ ]
         uint256[] memory distribution = new uint256[](5);
-        
+
         // Cache array to memory for gas efficiency
         address[] memory users = s_users;
         uint256 usersLength = users.length;
