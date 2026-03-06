@@ -377,22 +377,27 @@ contract DSCEngine is ReentrancyGuard {
     }
 
     function getHealthFactorDistribution() external view returns (uint256[] memory) {
-        // Buckets: [ <1.0, 1.0-1.2, 1.2-1.5, 1.5-2.0, 2.0+ ]
+        // Buckets: [ <1.0 (Liquidatable), 1.0-1.2, 1.2-1.5, 1.5-2.0, 2.0+ ]
         uint256[] memory distribution = new uint256[](5);
+        
+        // Cache array to memory for gas efficiency
+        address[] memory users = s_users;
+        uint256 usersLength = users.length;
 
-        for (uint256 i = 0; i < s_users.length; i++) {
-            uint256 hf = _healthFactor(s_users[i]);
+        for (uint256 i = 0; i < usersLength; i++) {
+            uint256 hf = _healthFactor(users[i]);
 
-            if (hf < 1e18) {
+            // Using MIN_HEALTH_FACTOR (1e18) as the baseline
+            if (hf < MIN_HEALTH_FACTOR) {
                 distribution[0]++; // Liquidatable
-            } else if (hf < 1.2e18) {
-                distribution[1]++; // Warning
-            } else if (hf < 1.5e18) {
-                distribution[2]++; // Safe
-            } else if (hf < 2e18) {
-                distribution[3]++; // Very Safe
+            } else if (hf < (MIN_HEALTH_FACTOR * 12) / 10) {
+                distribution[1]++; // Warning (1.0 - 1.2)
+            } else if (hf < (MIN_HEALTH_FACTOR * 15) / 10) {
+                distribution[2]++; // Safe (1.2 - 1.5)
+            } else if (hf < (MIN_HEALTH_FACTOR * 2)) {
+                distribution[3]++; // Very Safe (1.5 - 2.0)
             } else {
-                distribution[4]++; // Overcollateralized
+                distribution[4]++; // Overcollateralized (2.0+)
             }
         }
         return distribution;
