@@ -382,7 +382,7 @@ contract DSCEngine is ReentrancyGuard {
 
         for (uint256 i = 0; i < s_users.length; i++) {
             uint256 hf = _healthFactor(s_users[i]);
-            
+
             if (hf < 1e18) {
                 distribution[0]++; // Liquidatable
             } else if (hf < 1.2e18) {
@@ -407,7 +407,7 @@ contract DSCEngine is ReentrancyGuard {
 
     function getGlobalProtocolStats() external view returns (ProtocolStats memory) {
         uint256 totalCollateralValueUsd = 0;
-        
+
         // Iterate through all allowed tokens to get TVL
         for (uint256 i = 0; i < s_collateralTokens.length; i++) {
             address token = s_collateralTokens[i];
@@ -416,16 +416,14 @@ contract DSCEngine is ReentrancyGuard {
         }
 
         uint256 totalSupply = i_dsc.totalSupply();
-        
+
         // Get ETH price specifically (assuming WETH is s_collateralTokens[0] or similar)
         // Alternatively, call your price feed directly
-        uint256 ethPrice = getUsdValue(s_collateralTokens[0], 1e18); 
+        uint256 ethPrice = getUsdValue(s_collateralTokens[0], 1e18);
 
         // Calculate Global Collateral Ratio
         // If supply is 0, ratio is technically infinite, we'll return 0 or a max value
-        uint256 globalRatio = totalSupply > 0 
-            ? (totalCollateralValueUsd * 100) / totalSupply 
-            : 0;
+        uint256 globalRatio = totalSupply > 0 ? (totalCollateralValueUsd * 100) / totalSupply : 0;
 
         return ProtocolStats({
             totalTvlUsd: totalCollateralValueUsd,
