@@ -49,6 +49,10 @@ contract DSCEngine is ReentrancyGuard {
     mapping(address user => uint256 amountDscMinted) private s_DSCMinted;
     address[] private s_collateralTokens;
 
+    // Add this to track the "Keys"
+    address[] private s_users;
+    mapping(address user => bool) private s_hasAccount; // Prevents duplicate entries in s_users
+
     DecentralizedStableCoin private immutable i_dsc;
 
     event CollateralDeposited(address indexed user, address indexed token, uint256 indexed amount);
@@ -108,6 +112,11 @@ contract DSCEngine is ReentrancyGuard {
         isAllowedToken(tokenCollateralAddress)
         nonReentrant
     {
+        if (!s_hasAccount[msg.sender]) {
+            s_users.push(msg.sender);
+            s_hasAccount[msg.sender] = true;
+        }
+
         s_collateralDeposited[msg.sender][tokenCollateralAddress] += amountCollateral;
         emit CollateralDeposited(msg.sender, tokenCollateralAddress, amountCollateral);
         bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(this), amountCollateral);
@@ -365,5 +374,27 @@ contract DSCEngine is ReentrancyGuard {
 
     function getDsc() external view returns (address) {
         return address(i_dsc);
+    }
+
+    function getHealthFactorDistribution() external view returns (uint256[] memory) {
+        // Buckets: [ <1.0, 1.0-1.2, 1.2-1.5, 1.5-2.0, 2.0+ ]
+        uint256[] memory distribution = new uint256[](5);
+
+        for (uint256 i = 0; i < s_users.length; i++) {
+            uint256 hf = _healthFactor(s_users[i]);
+            
+            if (hf < 1e18) {
+                distribution[0]++; // Liquidatable
+            } else if (hf < 1.2e18) {
+                distribution[1]++; // Warning
+            } else if (hf < 1.5e18) {
+                distribution[2]++; // Safe
+            } else if (hf < 2e18) {
+                distribution[3]++; // Very Safe
+            } else {
+                distribution[4]++; // Overcollateralized
+            }
+        }
+        return distribution;
     }
 }
