@@ -41,13 +41,13 @@ contract PopulateDistribution is Script {
             // Send native ETH for gas (required for Sepolia)
             (bool success, ) = user.call{value: gasMoney}("");
             require(success, "ETH transfer failed. Check main account ETH balance.");
-            
+
             // Send WETH
             IERC20(weth).transfer(user, baseCollateral);
             vm.stopBroadcast();
 
             // 3. Determine how much DSC to mint based on bucket (0 to 3)
-            uint256 bucket = i % 4;
+            uint256 bucket = vm.randomUint(0, 3);   // inclusive on both ends
             uint256 dscToMint;
             
             if (bucket == 0) {
