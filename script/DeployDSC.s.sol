@@ -17,7 +17,8 @@ contract DeployDSC is Script {
         helperConfig.deployMocksAndSetConfig();
         vm.stopBroadcast();
 
-        (address wethUsdPriceFeed, address wbtcUsdPriceFeed, address weth, address wbtc) = helperConfig.activeNetworkConfig();
+        (address wethUsdPriceFeed, address wbtcUsdPriceFeed, address weth, address wbtc) =
+            helperConfig.activeNetworkConfig();
 
         tokenAddresses = [weth, wbtc];
         priceFeedAddresses = [wethUsdPriceFeed, wbtcUsdPriceFeed];

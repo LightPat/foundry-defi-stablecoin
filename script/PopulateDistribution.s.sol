@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import {Script, console} from "forge-std/Script.sol";
 import {DSCEngine} from "../src/DSCEngine.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol"; 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract PopulateDistribution is Script {
     DSCEngine engine;
@@ -17,14 +17,14 @@ contract PopulateDistribution is Script {
     function run(address _engineAddress, address _helperConfigAddress, uint32 _numberOfUsers) external {
         engine = DSCEngine(_engineAddress);
         config = HelperConfig(_helperConfigAddress);
-        
-        (, , weth,) = config.activeNetworkConfig();
+
+        (,, weth,) = config.activeNetworkConfig();
 
         console.log("WETH Address: ", weth);
 
         // Constants for funding
         uint256 baseCollateral = 10 ether; // Deposit 10 WETH each
-        uint256 gasMoney = 0.05 ether;     // ETH for gas fees on Sepolia
+        uint256 gasMoney = 0.05 ether; // ETH for gas fees on Sepolia
 
         console.log("Populating", _numberOfUsers, "users...");
 
@@ -37,9 +37,9 @@ contract PopulateDistribution is Script {
             // 2. Fund the user with ETH and WETH from your main account
             // Calling vm.startBroadcast() without args uses the account from the CLI
             vm.startBroadcast();
-            
+
             // Send native ETH for gas (required for Sepolia)
-            (bool success, ) = user.call{value: gasMoney}("");
+            (bool success,) = user.call{value: gasMoney}("");
             require(success, "ETH transfer failed. Check main account ETH balance.");
 
             // Send WETH
@@ -47,9 +47,9 @@ contract PopulateDistribution is Script {
             vm.stopBroadcast();
 
             // 3. Determine how much DSC to mint based on bucket (0 to 3)
-            uint256 bucket = vm.randomUint(0, 3);   // inclusive on both ends
+            uint256 bucket = vm.randomUint(0, 3); // inclusive on both ends
             uint256 dscToMint;
-            
+
             if (bucket == 0) {
                 dscToMint = 1000 ether; // HF > 2.0
                 console.log("Target: HF > 2.0");
@@ -70,7 +70,7 @@ contract PopulateDistribution is Script {
             engine.depositCollateralAndMintDsc(weth, baseCollateral, dscToMint);
             vm.stopBroadcast();
         }
-        
+
         console.log("Successfully populated users!");
     }
 }
