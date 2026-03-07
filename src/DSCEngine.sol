@@ -413,6 +413,8 @@ contract DSCEngine is ReentrancyGuard {
         return s_users.length;
     }
 
+    // THIS IS NOT IN USE BECAUSE IT'S REVERTING ON THE TEST NET FOR SOME REASON BUT WAS WORKING ON ANVIL. THE FRONT END DOES THESE CALCULATIONS NOW
+    // 3/7/2026 - Patrick Seeman
     struct ProtocolStats {
         uint256 totalTvlUsd;
         uint256 totalDscSupply;
