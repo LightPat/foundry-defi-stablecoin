@@ -39,7 +39,7 @@ contract PopulateDistribution is Script {
 
         // PHASE 1: MASS FUNDING (One broadcast from your --account)
         console.log("Phase 1: Funding users from Bank...");
-        vm.startBroadcast(); 
+        vm.startBroadcast();
         for (uint32 i = 0; i < _numberOfUsers; i++) {
             (bool success,) = users[i].call{value: gasMoney}("");
             require(success, "ETH transfer failed. Check main account ETH balance.");
@@ -57,7 +57,7 @@ contract PopulateDistribution is Script {
             IERC20(weth).approve(address(engine), baseCollateral);
             engine.depositCollateralAndMintDsc(weth, baseCollateral, dscToMint);
             vm.stopBroadcast();
-            
+
             console.log("User", i, "deposited in bucket:", bucket);
         }
 
@@ -68,6 +68,6 @@ contract PopulateDistribution is Script {
         if (bucket == 0) return 1000 gwei; // HF > 2
         if (bucket == 1) return 6000 gwei; // 1.5 - 2
         if (bucket == 2) return 7500 gwei; // 1.2 - 1.5
-        return 9000 gwei;                 // 1.0 - 1.2
+        return 9000 gwei; // 1.0 - 1.2
     }
 }
