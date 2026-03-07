@@ -6,8 +6,8 @@ This is a section of the Cyfrin Solidity Course.
 
 # About
 
-You can interact with this project at [My Web3 Portfolio Website](https://patrickseeman.com/)
-[View on etherscan](https://sepolia.etherscan.io/address/0x6aA0e5fD458D3c0BCfE55Fe51bA292f866CD2E74)
+You can interact with this project at [My Web3 Portfolio Website](https://patrickseeman.com/)  
+[View On Etherscan ↗](https://sepolia.etherscan.io/address/0x6aA0e5fD458D3c0BCfE55Fe51bA292f866CD2E74)
 
 This project is a decentralized overcollateralized stablecoin protocol inspired by DAI. It uses Chainlink price feeds to maintain a $1 USD peg and enforces on-chain collateralization rules to ensure system solvency. Users can mint the stablecoin by depositing exogenous crypto collateral (wETH and wBTC), with minting and liquidation logic enforced algorithmically through smart contracts. The protocol demonstrates core DeFi concepts including price oracles, collateralized debt positions, mint/burn mechanics, and decentralized stability guarantees.
 
