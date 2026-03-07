@@ -23,54 +23,51 @@ contract PopulateDistribution is Script {
         console.log("WETH Address: ", weth);
 
         // Constants for funding
-        uint256 baseCollateral = 10 ether; // Deposit 10 WETH each
-        uint256 gasMoney = 0.05 ether; // ETH for gas fees on Sepolia
+        uint256 baseCollateral = 10 gwei; // Deposit 10 WETH each
+        uint256 gasMoney = 0.05 gwei; // ETH for gas fees on Sepolia
 
         console.log("Populating", _numberOfUsers, "users...");
 
+        address[] memory users = new address[](_numberOfUsers);
+        uint256[] memory pks = new uint256[](_numberOfUsers);
+
+        // PRE-CALCULATE ADDRESSES
         for (uint32 i = 0; i < _numberOfUsers; i++) {
-            // 1. Generate user wallet from mnemonic
-            uint256 userPk = vm.deriveKey(MNEMONIC, i);
-            address user = vm.addr(userPk);
-            console.log("--- Setting up User:", user, "---");
+            pks[i] = vm.deriveKey(MNEMONIC, i);
+            users[i] = vm.addr(pks[i]);
+        }
 
-            // 2. Fund the user with ETH and WETH from your main account
-            // Calling vm.startBroadcast() without args uses the account from the CLI
-            vm.startBroadcast();
-
-            // Send native ETH for gas (required for Sepolia)
-            (bool success,) = user.call{value: gasMoney}("");
+        // PHASE 1: MASS FUNDING (One broadcast from your --account)
+        console.log("Phase 1: Funding users from Bank...");
+        vm.startBroadcast(); 
+        for (uint32 i = 0; i < _numberOfUsers; i++) {
+            (bool success,) = users[i].call{value: gasMoney}("");
             require(success, "ETH transfer failed. Check main account ETH balance.");
+            IERC20(weth).transfer(users[i], baseCollateral);
+        }
+        vm.stopBroadcast();
 
-            // Send WETH
-            IERC20(weth).transfer(user, baseCollateral);
-            vm.stopBroadcast();
+        // PHASE 2: INDIVIDUAL DEPOSITS
+        console.log("Phase 2: Users depositing to Engine...");
+        for (uint32 i = 0; i < _numberOfUsers; i++) {
+            uint256 bucket = vm.randomUint(0, 3);
+            uint256 dscToMint = _getMintAmount(bucket);
 
-            // 3. Determine how much DSC to mint based on bucket (0 to 3)
-            uint256 bucket = vm.randomUint(0, 3); // inclusive on both ends
-            uint256 dscToMint;
-
-            if (bucket == 0) {
-                dscToMint = 1000 ether; // HF > 2.0
-                console.log("Target: HF > 2.0");
-            } else if (bucket == 1) {
-                dscToMint = 6000 ether; // 1.5 < HF < 2.0
-                console.log("Target: 1.5 < HF < 2.0");
-            } else if (bucket == 2) {
-                dscToMint = 7500 ether; // 1.2 < HF < 1.5
-                console.log("Target: 1.2 < HF < 1.5");
-            } else {
-                dscToMint = 9000 ether; // 1.0 < HF < 1.2
-                console.log("Target: 1.0 < HF < 1.2");
-            }
-
-            // 4. Act as the dummy user to approve and mint
-            vm.startBroadcast(userPk);
+            vm.startBroadcast(pks[i]);
             IERC20(weth).approve(address(engine), baseCollateral);
             engine.depositCollateralAndMintDsc(weth, baseCollateral, dscToMint);
             vm.stopBroadcast();
+            
+            console.log("User", i, "deposited in bucket:", bucket);
         }
 
         console.log("Successfully populated users!");
+    }
+
+    function _getMintAmount(uint256 bucket) internal pure returns (uint256) {
+        if (bucket == 0) return 1000 gwei; // HF > 2
+        if (bucket == 1) return 6000 gwei; // 1.5 - 2
+        if (bucket == 2) return 7500 gwei; // 1.2 - 1.5
+        return 9000 gwei;                 // 1.0 - 1.2
     }
 }
